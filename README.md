@@ -282,7 +282,7 @@ Expected output:
 ```
 BACnet B-DAP (Device Address Proxy) Example - C++ v1.0.0
 CAS BACnet Stack version: 6.0.21.0
-Common helper (common/) version: 2.3.0
+Common helper (common/) version: 2.5.0
 FYI: Listening for BACnet/IP on UDP port 47808 (Network Port 1).
 TX 21 bytes to 192.168.3.255:47808 (broadcast) (Network Port 1)
 FYI: Device 389021 ("Rainbow") ready. Vendor ID 389. Press 'h' for help.
