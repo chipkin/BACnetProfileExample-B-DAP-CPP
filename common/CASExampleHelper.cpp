@@ -606,6 +606,7 @@ KeyCommand PollKey() {
     if (c == 's' || c == 'S') return KeyCommand::DemoAdvance;
     if (c == 'w' || c == 'W') return KeyCommand::WriteGroupDemo;
     if (c == 'd' || c == 'D') return KeyCommand::DiscoverRemote;
+    if (c == 'r' || c == 'R') return KeyCommand::RouterAnnounce;
     return KeyCommand::None;
 #else
     EnableRawInput();
@@ -624,6 +625,7 @@ KeyCommand PollKey() {
     if (buf[0] == 's' || buf[0] == 'S') return KeyCommand::DemoAdvance;
     if (buf[0] == 'w' || buf[0] == 'W') return KeyCommand::WriteGroupDemo;
     if (buf[0] == 'd' || buf[0] == 'D') return KeyCommand::DiscoverRemote;
+    if (buf[0] == 'r' || buf[0] == 'R') return KeyCommand::RouterAnnounce;
     return KeyCommand::None;
 #endif
 }
