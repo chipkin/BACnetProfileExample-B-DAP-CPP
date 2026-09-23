@@ -70,7 +70,7 @@ Interactive keys while running: `h` help, `q` quit, up/down nudge Analog Input 1
 
 ## Conventions
 
-- Device is named "Rainbow"; objects use the series' colour names; vendor id 389.
+- Device is named "Chipkin Example B-DAP"; objects use the series' colour names; vendor id 389.
 - Implement **only** the services and objects the B-DAP profile requires (DS-RP-B,
   DS-WP-B, DM-DDB-B, DM-DOB-B; DM-DAB-B is documented as not implemented) - but
   expose **every required property** of each object for Protocol_Revision 24.
