@@ -3,7 +3,7 @@
     {
       "type": "Device",
       "instance": 389021,
-      "name": "Rainbow",
+      "name": "Chipkin Example B-DAP",
       "app": [
         "Object_Name",
         "Description",
