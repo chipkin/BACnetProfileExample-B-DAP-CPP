@@ -31,7 +31,7 @@ not perform the B-DAP Profile Function.
 
 The CAS BACnet Stack has **never implemented device address proxying**. Its
 own CHANGELOG records this under #2346 (in the pinned stack, `6.x` @
-`e6de4ffd`): the BACnet/SC Network Port stopped listing
+`64b2cfac5`): the BACnet/SC Network Port stopped listing
 `Device_Address_Proxy_Enable` / `Device_Address_Proxy_Timeout` because "The
 stack has never done that proxying: it never answers Who-Is from a
 Device_Address_Proxy_Table and never changes routing."
@@ -41,6 +41,21 @@ proxy or seed the table) would **not** close this: there is no proxying
 behaviour behind it to switch on. #2032 needs the proxying itself - the
 Who-Is handling, the `Device_Address_Proxy_Table`, routing - before this
 example can be reworked into a router that proxies.
+
+### Status (2026-10-15)
+
+The stack owner ruled on #2032 in the #2159 session-D pass (stack PR #3937,
+commit `aeaa1a37e`, in this Stack Pin): #2032 is **split into its own work
+package** and stays open. #3937 only removed stale header text that named the
+long-gone `SetDABHeartbeatBroadcast`; it added no export and no proxying. The
+package proposed in
+[#2032's comments](https://github.com/chipkin/cas-bacnet-stack/issues/2032) is a
+device-address-proxy engine in the network layer plus customer exports to
+configure it and restore its table, and it covers everything K.5.37 asks for:
+`Device_Address_Proxy_Enable` / `_Timeout` on every Network Port type,
+`Device_Address_Proxy_Table` and `Max_Proxied_I_Ams_Per_Second` on the Device,
+and the clause 19.9.1 behaviour. This example stays blocked on #2032 until that
+package lands; no separate child issue has been filed.
 
 ### What this example does instead
 
