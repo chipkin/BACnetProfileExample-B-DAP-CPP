@@ -18,10 +18,10 @@ see [README.md](../README.md).
 | **Vendor Identifier** | 389 |
 | **Product Name** | CAS BACnet Stack Example - B-DAP |
 | **Product Model Number** | CAS BACnet Stack Example - B-DAP |
-| **Application Software Version** | 1.0.0 |
-| **Firmware Revision** | 1.0.0 |
+| **Application Software Version** | 1.0.2 (`APP_VERSION` in `main.cpp`) |
+| **Firmware Revision** | the linked CAS BACnet Stack version (6.0.23.0 at this Stack Pin) |
 | **BACnet Protocol Version** | 1 |
-| **BACnet Protocol Revision** | 24 |
+| **BACnet Protocol Revision** | 30 |
 
 **Product Description:** a BACnet/IP device built on the CAS BACnet Stack that
 presents three read-only sensor objects (Analog Input, Binary Input,
@@ -29,7 +29,7 @@ Multi-State Input) and three commandable output objects (Analog Output, Binary
 Output, Multi-State Output). It answers ReadProperty for every required
 property of every object, accepts WriteProperty to the commandable outputs'
 `Present_Value`, and is discoverable by Who-Is / I-Am and Who-Has / I-Have. It
-does **not** implement DM-DAB-B (see section 8 and `TODO.md`). It is a
+does **not** implement DM-DAP-B (see section 8 and `TODO.md`). It is a
 tutorial for implementers of the B-DAP profile.
 
 ## 2. BACnet standardized device profile (Annex L)
@@ -48,7 +48,7 @@ superset of B-GENERAL's, a conformant B-DAP device also satisfies
 | DS-WP-B | Data Sharing - WriteProperty - B | ✅ |
 | DM-DDB-B | Device Management - Dynamic Device Binding - B | ✅ |
 | DM-DOB-B | Device Management - Dynamic Object Binding - B | ✅ |
-| DM-DAB-B | Device Management - Dynamic Address Binding - B | ❌ not implemented - see section 8 and `TODO.md` |
+| DM-DAP-B | Device Management - Device Address Proxying - B | ❌ not implemented - see section 8 and `TODO.md` |
 
 No other BIBBs are supported. In particular this device does **not** support
 DS-RPM-B (ReadPropertyMultiple), DS-COV-B, any alarm and event (AE-*) BIBB,
@@ -113,16 +113,15 @@ Static device binding is **not supported** for this device's own outbound
 communication - it answers Who-Is/Who-Has and does not initiate any confirmed
 request, so it never needs to bind a peer for its own use.
 
-**DM-DAB-B (Dynamic Address Binding - B), the BIBB that gives B-DAP its name -
-proxying address-binding requests on behalf of other devices on a
-directly-connected network - is NOT implemented in this example.** The pinned
-CAS BACnet Stack (`6.x` @ `abd4cee1`, reports 6.0.21) has no customer-facing
-export for device-address-proxy configuration; the get/set logic exists only
-on an internal C++ class and is not reachable from the DLL surface
-(`BACnetStack_*`) this example calls. See `TODO.md` for the full investigation
-and [cas-bacnet-stack#2032](https://github.com/chipkin/cas-bacnet-stack/issues/2032)
-for the tracking issue. This is a real, filed limitation, not a design choice -
-do not read the four implemented BIBBs above as evidence DM-DAB-B works.
+**DM-DAP-B (Device Address Proxying - B, Annex K.5.37), the BIBB that gives
+B-DAP its name - answering Who-Is with I-Am on behalf of the devices on a
+proxied network (clause 19.9) - is NOT implemented in this example.** The CAS
+BACnet Stack has never implemented device address proxying (stack CHANGELOG,
+#2346), so a customer-facing export alone would not close it. This is a
+Blocked Example on
+[cas-bacnet-stack#2032](https://github.com/chipkin/cas-bacnet-stack/issues/2032);
+see `TODO.md`. Do not read the four implemented BIBBs above as evidence
+DM-DAP-B works - today this device behaves as a B-SA.
 
 ## 9. Networking options
 
@@ -284,4 +283,4 @@ Every object this example creates, and every REQUIRED property of each (per ANSI
 - [README.md](../README.md) - what this example is and how to build it.
 - [TUTORIAL.md](../TUTORIAL.md) - how to extend it, and how to keep this
   document honest when you do.
-- [TODO.md](../TODO.md) - the DM-DAB-B investigation and tracking issue.
+- [TODO.md](../TODO.md) - the DM-DAP-B investigation and tracking issue.

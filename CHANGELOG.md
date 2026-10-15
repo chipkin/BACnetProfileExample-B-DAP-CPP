@@ -7,6 +7,31 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [1.0.2] - unreleased
 
+### Changed - honesty pass (2026-10-14)
+
+- **Stack Pin moved `abd4cee1` (6.0.21) -> `6.x` @ `e6de4ffd` (6.0.23)**, per
+  docs/adr/0001 (the pin follows the latest `6.x` when an example is updated).
+  Not the `6.x` tip `4b27bd56d`: that tip fails to link any customer
+  (non-test-tool) build - `RecordTypedGetDecline` is defined only under
+  `BACNET_STACK_TESTTOOL` (stack #3850, fixed on `issues/runbook` but not yet
+  promoted to `6.x`). `e6de4ffd` is the newest `6.x` commit that links. Builds
+  clean (STATIC) with no source change.
+- **Protocol_Revision is 30, not 24** - the stack default at this pin. README,
+  PICS, TUTORIAL, AGENTS.md and `main.cpp` comments said 24.
+- README version banner and sample output, and PICS Application Software
+  Version / Firmware Revision, now match what the program reports
+  (`APP_VERSION`, the linked stack version, `common/` 3.0.0).
+- Series profile table re-synced (B-ACCR and B-DAP marked as Blocked Examples).
+- **Now a Blocked Example on stack #2032.** README banner: a B-DAP is a router
+  that answers Who-Is for proxied devices (cl. 19.9); today this example behaves
+  as a B-SA.
+- The BIBB is **DM-DAP-B, Device Address Proxying** (Annex K.5.37), not
+  "DM-DAB-B Dynamic Address Binding" (Annex L's table misprints it; Annex K has
+  no such BIBB). Renamed throughout, including the Device `Description`.
+- TODO.md rewritten: the stack has never implemented device address proxying
+  (stack CHANGELOG #2346), so a customer export alone will not fix it; stale
+  `abd4cee1` line references dropped.
+
 ### Changed
 
 - **Device renamed from the series' colour placeholder "Rainbow" to "Chipkin

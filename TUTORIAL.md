@@ -217,7 +217,7 @@ rather than against "it looked fine in the explorer":
    value `2`) is rejected with `value-out-of-range`, not silently clamped.
 5. Confirm a WriteProperty to a read-only **input** (e.g. Analog Input 1) is
    still rejected.
-6. Confirm DM-DAB-B is genuinely absent from what the device claims:
+6. Confirm DM-DAP-B is genuinely absent from what the device claims:
    `Protocol_Services_Supported` should not claim any address-proxy service
    this device does not implement. Do not add code that makes the device
    *look* like it proxies address bindings without the stack actually doing
@@ -258,4 +258,4 @@ not in `accepted`, comes out as a ⚠ row - that is a defect, not a feature.
 | WriteProperty to an output returns `value-out-of-range` | Working as intended — the `Set*` callbacks validate the written value (a Binary Output only accepts 0/1, a Multi-State Output only accepts `1..Number_Of_States`). Write an in-range value. |
 | Client sends Who-Is but sees no I-Am | Firewall is blocking UDP 47808, or the client and device are on different subnets (Who-Is is a broadcast). Allow the port; test on the same subnet first. |
 | Replies show an unexpected device instance or vendor | Another BACnet device is already answering on this host/port. On Linux/macOS two processes can share the port and both reply; on Windows the example asks for `SO_EXCLUSIVEADDRUSE` (`common/SimpleUDP.cpp`) so this shows up as a bind failure instead. Stop the other device, or use `--port`. |
-| Looking for the device-address-proxy (DM-DAB-B) behavior | **It is not implemented in this example.** The pinned CAS BACnet Stack has no customer-facing export for device-address-proxy configuration - see `TODO.md` and [cas-bacnet-stack#2032](https://github.com/chipkin/cas-bacnet-stack/issues/2032). Do not treat DM-DDB-B/DM-DOB-B (which this example does implement) as a substitute; they are different BIBBs. |
+| Looking for the device-address-proxy (DM-DAP-B) behavior | **It is not implemented in this example, which is blocked on it.** The CAS BACnet Stack has never implemented device address proxying (stack CHANGELOG #2346) - see `TODO.md` and [cas-bacnet-stack#2032](https://github.com/chipkin/cas-bacnet-stack/issues/2032). Do not treat DM-DDB-B/DM-DOB-B (which this example does implement) as a substitute; they are different BIBBs. |

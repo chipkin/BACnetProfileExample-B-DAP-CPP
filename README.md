@@ -1,5 +1,17 @@
 # BACnet B-DAP (Device Address Proxy) - C++ example
 
+> **Blocked Example - blocked on
+> [chipkin/cas-bacnet-stack#2032](https://github.com/chipkin/cas-bacnet-stack/issues/2032).**
+> A B-DAP is "a BACnet network router that provides device address proxying
+> for one or more directly connected networks" (Annex L.7.7): it answers
+> Who-Is with I-Am on behalf of the devices on a proxied network, from its
+> Device_Address_Proxy_Table (clause 19.9). The CAS BACnet Stack has never
+> implemented that proxying (stack CHANGELOG, #2346: it "never answers Who-Is
+> from a Device_Address_Proxy_Table"), so this example cannot perform the
+> B-DAP Profile Function. **What it does today is what a B-SA does:** a
+> single, non-routing BACnet/IP device with three sensor inputs and three
+> commandable outputs. It does not route, and it proxies nothing.
+
 A minimal, copy-paste-friendly example showing how to implement the BACnet
 **B-DAP (BACnet Device Address Proxy)** device profile in C++ using the
 [CAS BACnet Stack](https://store.chipkin.com/services/stacks/bacnet-stack).
@@ -15,9 +27,9 @@ accepts **WriteProperty** to its commandable outputs, and is discoverable via
 - **[docs/PICS.md](docs/PICS.md)** - the Protocol Implementation Conformance
   Statement: every object, every property, and who answers it.
 
-> **Versions:** this document describes **example v1.0.0**, built and verified
-> against **CAS BACnet Stack 6.0.21** (`6.x` @ `abd4cee1`), at
-> **Protocol_Revision 24**, with the vendored `common/` helper at **v2.5.0**.
+> **Versions:** this document describes **example v1.0.2**, built and verified
+> against **CAS BACnet Stack 6.0.23** (`6.x` @ `e6de4ffd`), at
+> **Protocol_Revision 30**, with the vendored `common/` helper at **v3.0.0**.
 > Running the example prints all three - if what it prints disagrees with this
 > line, trust the program and check `CHANGELOG.md`.
 
@@ -25,9 +37,10 @@ B-DAP's required BIBB set - DS-RP-B, DS-WP-B, DM-DDB-B, DM-DOB-B - is
 identical to [B-SA (Smart Actuator)](https://github.com/chipkin/BACnetProfileExample-B-SA-CPP)'s,
 so the object model and service wiring below are the same: three read-only
 sensor inputs plus three commandable outputs a client drives with
-WriteProperty. B-DAP additionally requires **DM-DAB-B** (Dynamic Address
-Binding - proxying address-binding requests on behalf of other devices);
-**this example does not implement it** - see [TODO.md](TODO.md) for why.
+WriteProperty. B-DAP additionally requires **DM-DAP-B** (Device Address
+Proxying, Annex K.5.37 - answering Who-Is with I-Am on behalf of proxied
+devices), which itself requires NM-RC-B: a B-DAP is a router. **This example
+does neither** - see [TODO.md](TODO.md) for why.
 
 ## Commandable outputs (demonstrating DS-WP-B)
 
@@ -72,7 +85,7 @@ colour-naming convention (Device is always "Chipkin Example B-DAP").
 
 The example implements exactly the capabilities below - and nothing more, which
 is the point of a profile example. These capabilities satisfy four of the five
-BIBBs the **B-DAP (BACnet Device Address Proxy)** profile requires; DM-DAB-B is
+BIBBs the **B-DAP (BACnet Device Address Proxy)** profile requires; DM-DAP-B is
 not implemented (see [TODO.md](TODO.md)). Because DS-RP-B/DM-DDB-B/DM-DOB-B are
 a superset of the **B-GENERAL** baseline, a conformant device necessarily
 satisfies **B-GENERAL** too. That is subsumption, not a second claim: this
@@ -86,7 +99,7 @@ repository still claims exactly one profile.
 | DS-WP-B | Data Sharing - WriteProperty - B | ✅ |
 | DM-DDB-B | Device Management - Dynamic Device Binding - B | ✅ |
 | DM-DOB-B | Device Management - Dynamic Object Binding - B | ✅ |
-| DM-DAB-B | Device Management - Dynamic Address Binding - B | ⏳ not implemented — see [TODO.md](TODO.md) |
+| DM-DAP-B | Device Management - Device Address Proxying - B | ⏳ not implemented — see [TODO.md](TODO.md) |
 
 ### Services (executed / B-side)
 
@@ -195,9 +208,9 @@ CMake at it: `cmake -B build -S . -D CAS_STACK_DIR=/path/to/cas-bacnet-stack`.
 Expected output:
 
 ```
-BACnet B-DAP (Device Address Proxy) Example - C++ v1.0.0
-CAS BACnet Stack version: 6.0.21.0
-Common helper (common/) version: 2.5.0
+BACnet B-DAP (Device Address Proxy) Example - C++ v1.0.2
+CAS BACnet Stack version: 6.0.23.0
+Common helper (common/) version: 3.0.0
 FYI: Listening for BACnet/IP on UDP port 47808 (Network Port 1).
 TX 21 bytes to 192.168.3.255:47808 (broadcast) (Network Port 1)
 FYI: Device 389021 ("Chipkin Example B-DAP") ready. Vendor ID 389. Press 'h' for help.
@@ -252,7 +265,7 @@ Use a BACnet client such as the
    (`Chipkin Example B-DAP`), three inputs, three outputs, and the Network Port (`Vermilion`).
    Reading the Device's `Object_List` returns all eight.
 3. **Read the Device** - ReadProperty `389021` -> `Object_Name` returns
-   `"Chipkin Example B-DAP"`; `Protocol_Revision` returns `24`; `Description` returns the
+   `"Chipkin Example B-DAP"`; `Protocol_Revision` returns `30`; `Description` returns the
    profile description string.
 4. **Read a sensor** - ReadProperty Analog Input `1` -> `Present_Value` returns
    `21.5`; `Units` returns `degrees-Celsius`; `Object_Name` returns `"Bronze"`.
@@ -269,8 +282,8 @@ Use a BACnet client such as the
 7. **Discover by object (DM-DOB-B)** - send a **Who-Has** naming Analog Input 1
    (`"Bronze"`). The device replies with **I-Have**. `Protocol_Services_Supported`
    read from the Device confirms `who-has` and `i-have` are both enabled.
-8. **DM-DAB-B is not exercised here** - this example does not proxy
-   address-binding requests for other devices; see [TODO.md](TODO.md) for why.
+8. **DM-DAP-B is not exercised here** - this example does not answer Who-Is
+   on behalf of any other device; see [TODO.md](TODO.md) for why.
 
 For a property-by-property review against the conformance statement, see
 [TUTORIAL.md](TUTORIAL.md).
@@ -279,7 +292,7 @@ For a property-by-property review against the conformance statement, see
 ## The BACnet profile example series
 
 <!-- PROFILE-TABLE:BEGIN (generated from cas-bacnet-stack-examples/docs/profile-table.md - do not edit here) -->
-The CAS BACnet Stack supports every standardized device profile in ASHRAE 135-2024 Annex L, and there is one example repository per profile. Pick the profile your device claims, then the language you build in. "Ask" means the example hasn't been built yet for that language - [contact Chipkin](https://store.chipkin.com/contact-us) if you need one.
+There is one example repository per standardized device profile in ASHRAE 135-2024 Annex L. An example marked ⛔ is blocked: the stack cannot yet perform that profile's function through its customer interface, and the example's README says what it does today. Pick the profile your device claims, then the language you build in. "Ask" means the example hasn't been built yet for that language - [contact Chipkin](https://store.chipkin.com/contact-us) if you need one.
 
 ### Controllers (Annex L.4)
 
@@ -332,10 +345,10 @@ The CAS BACnet Stack supports every standardized device profile in ASHRAE 135-20
 |---|---|---|---|---|---|---|
 | **B-BBMD** Broadcast Management Device | [B-BBMD-CPP](https://github.com/chipkin/BACnetProfileExample-B-BBMD-CPP) | Ask | Ask | Ask | Ask | Ask |
 | **B-ACDC** Access Control Door Controller | [B-ACDC-CPP](https://github.com/chipkin/BACnetProfileExample-B-ACDC-CPP) | Ask | Ask | Ask | Ask | Ask |
-| **B-ACCR** Access Control Credential Reader | [B-ACCR-CPP](https://github.com/chipkin/BACnetProfileExample-B-ACCR-CPP) | Ask | Ask | Ask | Ask | Ask |
+| **B-ACCR** Access Control Credential Reader | [B-ACCR-CPP](https://github.com/chipkin/BACnetProfileExample-B-ACCR-CPP) ⛔ blocked: credential format not reportable (no stack issue yet) | Ask | Ask | Ask | Ask | Ask |
 | **B-RTR** Router | [B-RTR-CPP](https://github.com/chipkin/BACnetProfileExample-B-RTR-CPP) | Ask | Ask | Ask | Ask | Ask |
 | **B-GW** Gateway | [B-GW-CPP](https://github.com/chipkin/BACnetProfileExample-B-GW-CPP) | Ask | Ask | Ask | Ask | Ask |
-| **B-DAP** Device Address Proxy | [B-DAP-CPP](https://github.com/chipkin/BACnetProfileExample-B-DAP-CPP) | Ask | Ask | Ask | Ask | Ask |
+| **B-DAP** Device Address Proxy | [B-DAP-CPP](https://github.com/chipkin/BACnetProfileExample-B-DAP-CPP) ⛔ blocked on [stack #2032](https://github.com/chipkin/cas-bacnet-stack/issues/2032) | Ask | Ask | Ask | Ask | Ask |
 | **B-SCHUB** BACnet/SC Hub | [B-SCHUB-CPP](https://github.com/chipkin/BACnetProfileExample-B-SCHUB-CPP) | Ask | Ask | Ask | Ask | Ask |
 | **B-GENERAL** General device (Annex L.8) | *(satisfied by every example above)* | — | — | — | — | — |
 
@@ -363,7 +376,7 @@ Client-side profiles.
 | **B-EWS** Elevator Workstation | planned | — | — | — | — | — |
 | **B-AEWS** Advanced Elevator Workstation | planned | — | — | — | — | — |
 
-🚧 = in progress. "Ask" = not yet built for that language; contact Chipkin if you need it. Profile definitions: ANSI/ASHRAE 135-2024 Annex L. BIBB definitions: Annex K. Get the stack: <https://store.chipkin.com/services/stacks/bacnet-stack>.
+🚧 = in progress. ⛔ = Blocked Example (blocked on the named stack gap). "Ask" = not yet built for that language; contact Chipkin if you need it. Profile definitions: ANSI/ASHRAE 135-2024 Annex L. BIBB definitions: Annex K. Get the stack: <https://store.chipkin.com/services/stacks/bacnet-stack>.
 <!-- PROFILE-TABLE:END -->
 
 ## References

@@ -1,56 +1,50 @@
 # TODO
 
-## DM-DAB-B (Device Management - Dynamic Address Binding - B) not implemented
+## Blocked: DM-DAP-B (Device Management - Device Address Proxying - B)
 
-The B-DAP (Device Address Proxy) profile requires DS-RP-B, DS-WP-B, DM-DDB-B,
-DM-DOB-B, and DM-DAB-B. This example implements the first four; **DM-DAB-B is
-not implemented**, because the pinned CAS BACnet Stack (`6.x` @ `abd4cee1`,
-reports 6.0.21) has no customer-facing export for it.
+This is a **Blocked Example**, blocked on
+[chipkin/cas-bacnet-stack#2032](https://github.com/chipkin/cas-bacnet-stack/issues/2032).
+Today it behaves as a B-SA: a single, non-routing BACnet/IP device. It does
+not perform the B-DAP Profile Function.
 
-### What was checked
+### What B-DAP needs
 
-- `grep -in "proxy\|DAB\|address.binding\|ForeignDevice"
-  submodules/cas-bacnet-stack/source/CASBACnetStackDLL.h` at the pin finds only:
-  - Device_Address_Binding (DAB) heartbeat tunables
-    (`BACnetStackSetting_DABHeartbeatIntervalSeconds`,
-    `BACnetStackSetting_DABRangeClusterTolerance`,
-    `BACnetStackSetting_DABMaxMissesBeforeStale`) - these configure the stack's
-    *own outbound* address resolution (it resolving addresses for devices it
-    wants to talk to as a client), not proxying address-binding on behalf of
-    other devices.
-  - BACnet/SC device-address-proxy property identifiers
-    (`BACnetPropertyIdentifier_deviceAddressProxyEnable/Table/Timeout`,
-    `maxProxiedIAmsPerSecond`) with **no matching `DllExport`**.
-- The actual get/set logic for those proxy properties lives only on the
-  internal C++ class `BACnetStackNetworkPortSC`
-  (`source/BACnetStackNetworkPortSC.cpp`: `SetDeviceAddressProxyEnable`,
-  `SetDeviceAddressProxyTimeout`, `SetSCDeviceAddressProxyEntries`) and
-  `BACnetDeviceAddressProxyTableEntry`
-  (`source/BACnetDeviceAddressProxyTableEntry.cpp`) - neither is exported in
-  `source/CASBACnetStackDLL.h`. `BACnetStack_AddNetworkPortObject`
-  (`CASBACnetStackDLL.h:742`) is the only network-port creation export and has
-  no SC-proxy-specific variant or parameter for host code to use.
-- A comment at `CASBACnetStackDLL.h:6031` references `SetDABHeartbeatBroadcast`
-  as the way to configure the heartbeat broadcast destination, but that
-  function was removed in Sprint 82 and does not exist anywhere in the header
-  (confirmed stale by the stack's own
-  `docs/reviews/2026-09-04-public-interface-function-review.md:201,2730`).
-- `docs/profiles.md:111` in this examples repo records DM-DAB-B as "flipped"
-  for B-DAP via an internal 143-test panel - that is a spec-literal/internal
-  test-panel determination made against the stack's own code, not evidence
-  that the capability is reachable from the customer DLL surface. It is not.
+- **The profile.** Annex L.7.7: "A B-DAP is a BACnet network router that
+  provides device address proxying for one or more directly connected
+  networks."
+- **The BIBB is DM-DAP-B, Device Address Proxying** (Annex K.5.37), not
+  "Dynamic Address Binding". (The Annex L profile table in 135-2024 prints the
+  entry as "DM-DAB-B"; Annex K defines no BIBB by that name, and K.5.37
+  DM-DAP-B is the one that matches the profile's description. Earlier versions
+  of this file used the misprint.) K.5.37: "The B device implements proxying
+  functionality and provides I-Am messages on behalf of proxied devices." It
+  also requires the `Device_Address_Proxy_Enable` property of the Network
+  Port, the `Device_Address_Proxy_Table` property of the Device (at least 128
+  entries per proxied network), execution of ReadRange, and NM-RC-B.
+- **The behaviour** (clause 19.9.1.1): when `Device_Address_Proxy_Enable` is
+  TRUE, the router "shall respond with a unicast I-Am unconfirmed request for
+  each device on the proxied network that is in the Device object's
+  Device_Address_Proxy_Table and matches the device range parameters of a
+  Who-Is request", as if the proxied device had sent it.
 
-### What's needed to close this
+### Why the stack cannot do it yet
 
-A customer-facing export equivalent to
-`BACnetStack_AddDeviceAddressProxyEntry(...)` /
-`BACnetStack_SetDeviceAddressProxyEnabled(networkPortInstance, bool)`, so host
-code can enable the proxy behavior and seed/inspect proxy table entries.
+The CAS BACnet Stack has **never implemented device address proxying**. Its
+own CHANGELOG records this under #2346 (in the pinned stack, `6.x` @
+`e6de4ffd`): the BACnet/SC Network Port stopped listing
+`Device_Address_Proxy_Enable` / `Device_Address_Proxy_Timeout` because "The
+stack has never done that proxying: it never answers Who-Is from a
+Device_Address_Proxy_Table and never changes routing."
 
-Filed: <https://github.com/chipkin/cas-bacnet-stack/issues/2032>
+So a customer-facing export alone (a `BACnetStack_*` function to enable the
+proxy or seed the table) would **not** close this: there is no proxying
+behaviour behind it to switch on. #2032 needs the proxying itself - the
+Who-Is handling, the `Device_Address_Proxy_Table`, routing - before this
+example can be reworked into a router that proxies.
 
 ### What this example does instead
 
-Implements DS-RP-B, DS-WP-B, DM-DDB-B, and DM-DOB-B in full (see README
-"Verify"), and leaves DM-DAB-B unimplemented rather than fake it. No
-`BACNET_STACK_TESTTOOL` code path is used anywhere in this repository.
+Implements DS-RP-B, DS-WP-B, DM-DDB-B and DM-DOB-B (see README "Verify"),
+and leaves DM-DAP-B unimplemented rather than fake it. It does not route and
+does not claim NM-RC-B. No `BACNET_STACK_TESTTOOL` code path is used anywhere
+in this repository.

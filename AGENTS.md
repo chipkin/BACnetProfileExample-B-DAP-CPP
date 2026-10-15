@@ -11,9 +11,11 @@ device profile using the CAS BACnet Stack. It is one of a series - one git repo
 per BACnet profile. B-DAP's required BIBB set (DS-RP-B, DS-WP-B, DM-DDB-B,
 DM-DOB-B) is identical to B-SA's, so the object model mirrors that example:
 three read-only sensor inputs plus three commandable output objects
-(WriteProperty, DS-WP-B). The profile's fifth BIBB, **DM-DAB-B**, is NOT
-implemented - see `TODO.md` and do not add fake/stubbed support for it; the
-pinned stack has no customer-facing export for it. The top priority is that
+(WriteProperty, DS-WP-B). The profile's fifth BIBB, **DM-DAP-B** (Device
+Address Proxying, K.5.37), is NOT implemented: this is a **Blocked Example**
+on stack issue #2032 - the stack has never implemented device address
+proxying (stack CHANGELOG #2346), so today the device is effectively a B-SA.
+See `TODO.md` and do not add fake/stubbed support for it. The top priority is that
 the code reads like a tutorial a customer can learn from and copy-paste.
 Favour clarity over cleverness.
 
@@ -31,7 +33,7 @@ This repository is self-contained:
   hand-edit between the `OBJECTS-PROPERTIES` markers.
 - `docs/objects.json` - the input to that generator. Update it in the same change
   as any `main.cpp` change that adds an object or a `GetProperty*` branch.
-- `TODO.md` - the DM-DAB-B investigation and tracking issue; keep it current if
+- `TODO.md` - the DM-DAP-B investigation and tracking issue; keep it current if
   the stack ever gains the missing export.
 - `submodules/cas-bacnet-stack/` - the **CAS BACnet Stack** as a git submodule
   (private; compiled from source). After cloning, run
@@ -72,8 +74,8 @@ Interactive keys while running: `h` help, `q` quit, up/down nudge Analog Input 1
 
 - Device is named "Chipkin Example B-DAP"; objects use the series' colour names; vendor id 389.
 - Implement **only** the services and objects the B-DAP profile requires (DS-RP-B,
-  DS-WP-B, DM-DDB-B, DM-DOB-B; DM-DAB-B is documented as not implemented) - but
-  expose **every required property** of each object for Protocol_Revision 24.
+  DS-WP-B, DM-DDB-B, DM-DOB-B; DM-DAP-B is documented as not implemented) - but
+  expose **every required property** of each object for Protocol_Revision 30.
 - Outputs are **commandable**: store the 16-slot `Priority_Array` +
   `Relinquish_Default` in the app (the `Commandable` struct); let the stack
   resolve `Present_Value`. Writes land via the `SetProperty*` callbacks (value)
@@ -93,7 +95,7 @@ There are no unit tests; verification is behavioural:
 2. With a BACnet client (e.g. the CAS BACnet Explorer), send **Who-Is** and
    confirm **I-Am** from the device instance.
 3. **ReadProperty** every required property of every object and confirm the
-   values; confirm `Protocol_Revision` is 24 and `Object_List` lists all objects.
+   values; confirm `Protocol_Revision` is 30 and `Object_List` lists all objects.
 4. **WriteProperty** a commandable output's `Present_Value` at a priority, re-read
    it (and its `Priority_Array`), then write NULL to relinquish and confirm it
    falls back to `Relinquish_Default`. Confirm a write to a read-only input is
