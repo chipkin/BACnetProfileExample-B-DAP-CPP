@@ -24,6 +24,25 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
   No new child issue exists, so #2032 stays the issue cited.
 - Series profile table re-synced (B-ACCR now links stack #3934).
 
+### Added - Wire Tests (2026-10-15)
+
+- **`tests/discovery_test.py`**, the series' discovery Wire Test (from
+  B-SS-CPP, with its visible Who-Is `[RETRY]`; only the device instance 389021,
+  executable name, port 47821 and the expected objects differ), plus
+  `tests/run_wire_tests.py` and `tests/README.md`: Who-Is, Object_List, and a
+  ReadProperty of every property every object lists - 14 checks, 114 reads, all
+  values, on Windows and Linux. `release.yml` runs it on Linux after the smoke
+  test. It tests the device's discovery surface only; the Profile Function is
+  still blocked on stack #2032.
+- **`wiretest/` 0.6.0**, the series' shared Python harness, vendored verbatim
+  from B-LS-CPP.
+
+### Changed - common/ 3.4.0 (2026-10-15)
+
+- **`common/` 3.3.0 -> 3.4.0**, vendored verbatim from B-SS-CPP `5d78299`:
+  `HelperSendMessage` sends a broadcast addressed to the socket's own address
+  to the subnet broadcast instead.
+
 ### Changed - honesty pass (2026-10-14)
 
 - **Stack Pin moved `abd4cee1` (6.0.21) -> `6.x` @ `e6de4ffd` (6.0.23)**, per
