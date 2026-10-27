@@ -80,7 +80,7 @@ using namespace CASBACnetStackExampleConstants;
 // 1. Example + device configuration
 // -----------------------------------------------------------------------------
 static const char* APP_NAME = "BACnet B-DAP (Device Address Proxy) Example - C++";
-static const char* APP_VERSION = "1.0.2";
+static const char* APP_VERSION = "1.1.0";
 
 // The device instance. BACnet requires this to be configurable, so it defaults
 // to 389021 (each profile example in the series has its own default, so several
@@ -117,12 +117,13 @@ static const uint32_t VENDOR_IDENTIFIER = 389;
 static const char* DEVICE_NAME = "Chipkin Example B-DAP";
 
 // The Device object's Description. Change it to what YOUR device actually is;
-// this string describes this tutorial.
+// this string describes this tutorial. Keep it under 255 characters: the stack
+// holds at most STACK_OPTION_MAX_CHARACTER_STRING_SIZE - 1 (255) octets from a
+// callback and refuses a longer value, so the property would read as "".
 static const char* DEVICE_DESCRIPTION =
     "Chipkin CAS BACnet Stack example - B-DAP (Device Address Proxy) profile. "
-    "Demonstrates DS-RP-B + DS-WP-B: ReadProperty and WriteProperty with "
-    "read-only sensor inputs and commandable outputs, plus DM-DDB-B/DM-DOB-B "
-    "discovery. DM-DAP-B is not implemented; see TODO.md.";
+    "DS-RP-B, DS-WP-B, DM-DDB-B, DM-DOB-B: read-only sensor inputs and "
+    "commandable outputs. DM-DAP-B is not implemented; see TODO.md.";
 
 // Device identity strings (read by clients, and used to populate I-Am).
 //   VENDOR_NAME - your company name; it must match VENDOR_IDENTIFIER above.
@@ -564,16 +565,19 @@ static bool ReturnCharacterString(const char* text, char* value,
                                   const uint32_t maxElementCount,
                                   uint8_t* encodingType) {
     uint32_t length = (uint32_t)strlen(text);
-    if (length > maxElementCount) {
+    // The stack offers a buffer of maxElementCount octets but holds at most
+    // maxElementCount - 1: a value of exactly maxElementCount is refused and the
+    // property reads as an empty string.
+    if (maxElementCount > 0 && length >= maxElementCount) {
         // Truncate SILENTLY to fit the stack's buffer. maxElementCount is
-        // MAX_CHARACTER_STRING_SIZE (256 in this build), and our longest string
-        // (DEVICE_DESCRIPTION) fits with room to spare - so this never trips
-        // here. But if you build with STACK_OPTION_TARGET_EMBEDDED, that limit drops to
+        // MAX_CHARACTER_STRING_SIZE (256 in this build, so at most 255 octets
+        // are held), and our longest string (DEVICE_DESCRIPTION) fits with room
+        // to spare - so this never trips here. But if you build with STACK_OPTION_TARGET_EMBEDDED, that limit drops to
         // 64, and a long Object_Name or Description would be clipped mid-word
         // with nothing on the wire or console to tell you. If you lengthen any
         // served string, check it against MAX_CHARACTER_STRING_SIZE for your
         // target, or make this truncation loud.
-        length = maxElementCount;
+        length = maxElementCount - 1;
     }
     memcpy(value, text, length);
     *valueElementCount = length;

@@ -68,5 +68,6 @@ Run 2026-10-15, stack `6.x` @ `64b2cfac5` (6.0.23), `wiretest/` 0.6.0,
 
 | Platform | Build | Result |
 |---|---|---|
+| Windows, re-run 2026-10-26 at `6.x` @ `69b6249f`, `common/` 3.4.1 | CMake, VS 18 | 14/14 - PASS, no `[RETRY]` |
 | Windows | STATIC (msbuild `ReleaseLib|x64` stack lib, VS 18 NMake) | 14/14 - PASS, 114 reads, no `[RETRY]` |
 | Linux (WSL Ubuntu 22.04) | STATIC (`projects/linux` makefile stack lib) | 14/14 - PASS, 114 reads, no `[RETRY]` |
