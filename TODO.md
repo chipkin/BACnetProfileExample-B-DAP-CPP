@@ -27,20 +27,25 @@ not perform the B-DAP Profile Function.
   Device_Address_Proxy_Table and matches the device range parameters of a
   Who-Is request", as if the proxied device had sent it.
 
-### Why the stack cannot do it yet
+### What the stack does and does not do yet (at v1.1.1, Stack Pin `6.x` @ `1e7dffe2b`)
 
-The CAS BACnet Stack has **never implemented device address proxying**. Its
-own CHANGELOG records this under #2346 (`6.x` @ `64b2cfac5`, and still so
-at the current Stack Pin `69b6249f`): the BACnet/SC Network Port stopped listing
-`Device_Address_Proxy_Enable` / `Device_Address_Proxy_Timeout` because "The
-stack has never done that proxying: it never answers Who-Is from a
-Device_Address_Proxy_Table and never changes routing."
+At the previous release's Stack Pin (`6.x` @ `69b6249f`) the CAS BACnet Stack
+did not perform device address proxying. The Stack Pin of this release does
+([chipkin/cas-bacnet-stack#4560](https://github.com/chipkin/cas-bacnet-stack/issues/4560),
+closed): a device whose own router is enabled (two or more router ports)
+performs the clause 19.9.1 proxying. Its Device gains
+`Device_Address_Proxy_Table` and `Max_Proxied_I_Ams_Per_Second`, each Network
+Port gains `Device_Address_Proxy_Enable` (default FALSE) and
+`Device_Address_Proxy_Timeout`, and a port proxies once its own
+`Device_Address_Proxy_Enable` is TRUE.
 
-So a customer-facing export alone (a `BACnetStack_*` function to enable the
-proxy or seed the table) would **not** close this: there is no proxying
-behaviour behind it to switch on. #2032 needs the proxying itself - the
-Who-Is handling, the `Device_Address_Proxy_Table`, routing - before this
-example can be reworked into a router that proxies.
+What is still missing before this example can perform B-DAP:
+
+- **This example is not a router.** It has one BACnet/IP port and does not
+  claim NM-RC-B, so the stack's proxying never switches on here. Reworking it
+  into a router with a proxied network is the next step in this repository.
+- **Keeping the proxy table over a restart** needs the customer export asked
+  for in #2032, which is still open.
 
 ### Status (2026-10-15)
 
@@ -57,20 +62,14 @@ configure it and restore its table, and it covers everything K.5.37 asks for:
 and the clause 19.9.1 behaviour. This example stays blocked on #2032 until that
 package lands; no separate child issue has been filed.
 
-### Status (2026-10-26, Stack Pin `6.x` @ `69b6249f`)
+### Status (2026-11-02, v1.1.1, Stack Pin `6.x` @ `1e7dffe2b`)
 
-Still blocked. The stack at this pin carries the data half of a device address
-proxy engine (the proxy table, learning devices from their I-Ams, revalidation
-and the I-Am budget), but nothing in the stack uses it yet. Read from the
-running example at this pin: Device `Device_Address_Proxy_Table` and
-`Max_Proxied_I_Ams_Per_Second`, and Network Port `Device_Address_Proxy_Enable`
-and `Device_Address_Proxy_Timeout`, all answer Error property /
-unknown-property and none is in a `Property_List`; a Who-Is for a range other
-than the device's own gets no answer. The router behaviour of clause 19.9.1 is
-being built in the stack's own work (stack issue chipkin/cas-bacnet-stack#4560) and has not reached
-`6.x` yet. Keeping the table over a restart still needs #2032's export. When
-both are on `6.x`, this example still has to become a router (NM-RC-B) before
-it can perform B-DAP.
+Still blocked on #2032. The router behaviour of clause 19.9.1 (#4560) is in
+this Stack Pin, but it applies only to a device that routes, and this example
+does not. Because the example is not a router, its Device and Network Port are
+expected to list none of the proxy properties and a Who-Is for a range other
+than the device's own to get no answer, as they did at `69b6249f`; that was
+not re-read from the running example at this pin.
 
 ### What this example does instead
 
@@ -82,8 +81,9 @@ in this repository.
 ### Known gaps in this example (ref: `chipkin/cas-bacnet-stack#2032`)
 
 - DM-DAP-B, DM-DDB-A, DM-LM-B and NM-RC-B are not claimed; the device does not
-  route. Reworking it into a router needs the stack's proxy engine on `6.x`
-  (chipkin/cas-bacnet-stack#4560).
+  route. The stack's router proxying
+  (chipkin/cas-bacnet-stack#4560, closed) is in this Stack Pin; reworking the
+  example into a router that uses it is not done yet.
 - The BTL run has no FAIL. Rows 10.2.9 to 10.2.12 are skipped (fixtures and
   `servicesExecuted` gates a customer project cannot meet) and 10.2.13 / 10.2.14
-  have no script (ref: `chipkin/chipkin-bacnet-testing-tool#735`).
+  have no script in the BTL test set.

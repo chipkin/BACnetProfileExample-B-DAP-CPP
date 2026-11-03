@@ -5,10 +5,13 @@
 > A B-DAP is "a BACnet network router that provides device address proxying
 > for one or more directly connected networks" (Annex L.7.7): it answers
 > Who-Is with I-Am on behalf of the devices on a proxied network, from its
-> Device_Address_Proxy_Table (clause 19.9). The CAS BACnet Stack has never
-> implemented that proxying (stack CHANGELOG, #2346: it "never answers Who-Is
-> from a Device_Address_Proxy_Table"), so this example cannot perform the
-> B-DAP Profile Function. **What it does today is what a B-SA does:** a
+> Device_Address_Proxy_Table (clause 19.9). The CAS BACnet Stack this example
+> is built on performs that proxying only when the stack itself is a router
+> with two or more ports
+> ([chipkin/cas-bacnet-stack#4560](https://github.com/chipkin/cas-bacnet-stack/issues/4560));
+> this example is not a router yet, and keeping the proxy table over a restart
+> still needs #2032, so it cannot perform the B-DAP Profile Function.
+> **What it does today is what a B-SA does:** a
 > single, non-routing BACnet/IP device with three sensor inputs and three
 > commandable outputs. It does not route, and it proxies nothing.
 
@@ -27,9 +30,9 @@ accepts **WriteProperty** to its commandable outputs, and is discoverable via
 - **[docs/PICS.md](docs/PICS.md)** - the Protocol Implementation Conformance
   Statement: every object, every property, and who answers it.
 
-> **Versions:** this document describes **example v1.1.0**, built and verified
-> against **CAS BACnet Stack 6.0.23** (`6.x` @ `69b6249f`), at
-> **Protocol_Revision 30**, with the vendored `common/` helper at **v3.4.1**.
+> **Versions:** this document describes **example v1.1.1**, built and verified
+> against **CAS BACnet Stack 6.0.23** (`6.x` @ `1e7dffe2b`), at
+> **Protocol_Revision 30**, with the vendored `common/` helper at **v3.6.1**.
 > Running the example prints all three - if what it prints disagrees with this
 > line, trust the program and check `CHANGELOG.md`.
 
@@ -210,9 +213,9 @@ CMake at it: `cmake -B build -S . -D CAS_STACK_DIR=/path/to/cas-bacnet-stack`.
 Expected output:
 
 ```
-BACnet B-DAP (Device Address Proxy) Example - C++ v1.1.0
+BACnet B-DAP (Device Address Proxy) Example - C++ v1.1.1
 CAS BACnet Stack version: 6.0.23.0
-Common helper (common/) version: 3.4.1
+Common helper (common/) version: 3.6.1
 FYI: Listening for BACnet/IP on UDP port 47808 (Network Port 1).
 TX 21 bytes to 192.168.3.255:47808 (broadcast) (Network Port 1) - Unconfirmed: I-Am
 FYI: Device 389021 ("Chipkin Example B-DAP") ready. Vendor ID 389. Press 'h' for help.
@@ -328,15 +331,15 @@ There is one example repository per standardized device profile in ASHRAE 135-20
 
 | Profile | C++ | Node.js | C# | Rust | Python | Go |
 |---|---|---|---|---|---|---|
-| **B-LSC** Life Safety Controller | [B-LSC-CPP](https://github.com/chipkin/BACnetProfileExample-B-LSC-CPP) 🚧 | Ask | Ask | Ask | Ask | Ask |
+| **B-LSC** Life Safety Controller | [B-LSC-CPP](https://github.com/chipkin/BACnetProfileExample-B-LSC-CPP) | Ask | Ask | Ask | Ask | Ask |
 | **B-ALSC** Advanced Life Safety Controller | [B-ALSC-CPP](https://github.com/chipkin/BACnetProfileExample-B-ALSC-CPP) | Ask | Ask | Ask | Ask | Ask |
 
 ### Access control controllers (Annex L.6)
 
 | Profile | C++ | Node.js | C# | Rust | Python | Go |
 |---|---|---|---|---|---|---|
-| **B-ACC** Access Control Controller | [B-ACC-CPP](https://github.com/chipkin/BACnetProfileExample-B-ACC-CPP) | Ask | Ask | Ask | Ask | Ask |
-| **B-AACC** Advanced Access Control Controller | [B-AACC-CPP](https://github.com/chipkin/BACnetProfileExample-B-AACC-CPP) | Ask | Ask | Ask | Ask | Ask |
+| **B-ACC** Access Control Controller | [B-ACC-CPP](https://github.com/chipkin/BACnetProfileExample-B-ACC-CPP) ⛔ blocked on [stack #2150](https://github.com/chipkin/cas-bacnet-stack/issues/2150), [#2044](https://github.com/chipkin/cas-bacnet-stack/issues/2044) | Ask | Ask | Ask | Ask | Ask |
+| **B-AACC** Advanced Access Control Controller | [B-AACC-CPP](https://github.com/chipkin/BACnetProfileExample-B-AACC-CPP) ⛔ blocked on [stack #2150](https://github.com/chipkin/cas-bacnet-stack/issues/2150), [#2044](https://github.com/chipkin/cas-bacnet-stack/issues/2044) | Ask | Ask | Ask | Ask | Ask |
 
 ### Lighting controllers (Annex L.11)
 
@@ -357,7 +360,7 @@ There is one example repository per standardized device profile in ASHRAE 135-20
 
 | Profile | C++ | Node.js | C# | Rust | Python | Go |
 |---|---|---|---|---|---|---|
-| **B-AS** Authorization Server | [B-AS-CPP](https://github.com/chipkin/BACnetProfileExample-B-AS-CPP) | Ask | Ask | Ask | Ask | Ask |
+| **B-AS** Authorization Server | [B-AS-CPP](https://github.com/chipkin/BACnetProfileExample-B-AS-CPP) ⛔ blocked on [stack #2043](https://github.com/chipkin/cas-bacnet-stack/issues/2043) | Ask | Ask | Ask | Ask | Ask |
 
 ### Miscellaneous (Annex L.7, combinable with any one family)
 
@@ -396,7 +399,7 @@ Client-side profiles.
 | **B-EWS** Elevator Workstation | planned | — | — | — | — | — |
 | **B-AEWS** Advanced Elevator Workstation | planned | — | — | — | — | — |
 
-🚧 = in progress. ⛔ = Blocked Example (blocked on the named stack gap). "Ask" = not yet built for that language; contact Chipkin if you need it. Profile definitions: ANSI/ASHRAE 135-2024 Annex L. BIBB definitions: Annex K. Get the stack: <https://store.chipkin.com/services/stacks/bacnet-stack>.
+⛔ = Blocked Example (blocked on the named stack gap). "Ask" = not yet built for that language; contact Chipkin if you need it. Profile definitions: ANSI/ASHRAE 135-2024 Annex L. BIBB definitions: Annex K. Get the stack: <https://store.chipkin.com/services/stacks/bacnet-stack>.
 <!-- PROFILE-TABLE:END -->
 
 ## References

@@ -138,7 +138,7 @@ object-name: "Chipkin Example B-DAP"
 object-type: DEVICE
 apdu-segment-timeout: 5000
 apdu-timeout: 10000
-application-software-version: "1.1.0"
+application-software-version: "1.1.1"
 description: "Chipkin CAS BACnet Stack example - B-DAP (Device Address Proxy) profile. DS-RP-B, DS-WP-B, DM-DDB-B, DM-DOB-B: read-only sensor inputs and commandable outputs. DM-DAP-B is not implemented; see TODO.md."
 device-address-binding: ?
 firmware-revision: "6.0.23.0"

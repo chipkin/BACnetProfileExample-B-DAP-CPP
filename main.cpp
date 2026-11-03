@@ -80,7 +80,7 @@ using namespace CASBACnetStackExampleConstants;
 // 1. Example + device configuration
 // -----------------------------------------------------------------------------
 static const char* APP_NAME = "BACnet B-DAP (Device Address Proxy) Example - C++";
-static const char* APP_VERSION = "1.1.0";
+static const char* APP_VERSION = "1.1.1";
 
 // The device instance. BACnet requires this to be configurable, so it defaults
 // to 389021 (each profile example in the series has its own default, so several

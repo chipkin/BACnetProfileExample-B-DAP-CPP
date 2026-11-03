@@ -7,7 +7,33 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
-_No changes yet._
+## [1.1.1] - 2026-11-02
+
+Built on CAS BACnet Stack 6.x (`1e7dffe2b`).
+
+This is still a **Blocked Example**, blocked on
+[chipkin/cas-bacnet-stack#2032](https://github.com/chipkin/cas-bacnet-stack/issues/2032).
+It behaves as a B-SA: a single, non-routing BACnet/IP device.
+
+### Changed
+
+- **CAS BACnet Stack updated** to 6.x (`1e7dffe2b`). At this version the stack
+  no longer gives the example an address for a broadcast it sends on its own,
+  such as the I-Am that answers a Who-Is; the vendored helper chooses it (next
+  item). This stack version also performs device address proxying when the
+  stack is itself a router
+  ([#4560](https://github.com/chipkin/cas-bacnet-stack/issues/4560)); this
+  example is not a router, so its behaviour does not change.
+- **Vendored `common/` updated to 3.6.1.** A broadcast the stack sends without
+  a destination address (a network layer message, or an unconfirmed I-Am or
+  I-Have) is broadcast on the subnet and also sent unicast to the last client
+  heard from on another UDP port of the same host, so a tool running beside
+  the example still hears the answer. Event notifications and BBMD-forwarded
+  messages are not copied. See `common/CHANGELOG.md`.
+- **README**: the Blocked Example note says what the stack now does and what
+  is still missing; the profile example table is the same in every example,
+  with the five blocked examples marked with their open stack issue.
+- **TODO.md** brought up to date for this version.
 
 ## [1.1.0] - 2026-10-27
 
